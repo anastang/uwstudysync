@@ -61,6 +61,13 @@ const Navigation = () => {
             >
               My Courses
             </Typography>
+            <Typography
+              component={Link}
+              to={'/myprofile'}
+              sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
+            >
+              My Profile
+            </Typography>
           </Box>
         </Drawer>
 

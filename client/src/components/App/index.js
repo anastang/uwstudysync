@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Landing from '../Landing';
+import Landing from '../Home';
 import MyCourses from '../MyCourses'
 import MyProfile from '../MyProfile'
 
@@ -21,4 +21,3 @@ const App = () => {
   );
 };
 export default App;
-
