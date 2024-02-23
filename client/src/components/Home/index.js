@@ -3,7 +3,7 @@ import Navigation from '../Navigation';
 import SearchBar from './SearchBar';
 import Box from '@mui/material/Box';
 
-const Landing = () => {
+const Home = () => {
   const [courses, setCourses] = React.useState([]);
 
   React.useEffect(() => {
@@ -34,4 +34,4 @@ const Landing = () => {
     </>
   );
 };
-export default Landing;
+export default Home;

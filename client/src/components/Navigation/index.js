@@ -8,24 +8,24 @@ import Typography from '@mui/material/Typography';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 
+const pages = [ 
+  {name: 'Home', path: '/'},
+  {name: 'My Courses', path: '/mycourses'},
+  {name: 'My Profile', path: '/myprofile'}
+];
+
 const Navigation = () => {
+  
   const [drawerOpen, setDrawerOpen] = useState(false);
   const handleDrawerOpen = event => {
     setDrawerOpen(event);
   };
 
   const location = useLocation();
-  const getPage = (pathname) => {
-    const pages = {
-      '/': 'Home',
-      '/mycourses': 'My Courses',
-      '/myprofile': 'My Profile',
-    };
-
-    return pages[pathname] || 'Page Not Found';
+  const getPage = (path) => {
+    const page = pages.find(page => page.path === path);
+    return page ? page.name : 'Page Not Found';
   };
-
-  const page = getPage(location.pathname);
 
   return (
     <AppBar position="static" elevation='1' sx={{backgroundColor: '#009688'}}>
@@ -47,31 +47,19 @@ const Navigation = () => {
               alignItems: 'center'
             }}
           >
-            <Typography
-              component={Link}
-              to={'/'}
-              sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
-            >
-              Home
-            </Typography>
-            <Typography
-              component={Link}
-              to={'/mycourses'}
-              sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
-            >
-              My Courses
-            </Typography>
-            <Typography
-              component={Link}
-              to={'/myprofile'}
-              sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
-            >
-              My Profile
-            </Typography>
+            {pages.map((page) => (
+              <Typography
+                component={Link}
+                to={page.path}
+                sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
+              >
+                {page.name}
+              </Typography>
+            ))}
           </Box>
         </Drawer>
 
-        <Typography sx={{fontWeight: 700, paddingX: 4}}>{page}</Typography>
+        <Typography sx={{fontWeight: 700, paddingX: 4}}>{getPage(location.pathname)}</Typography>
 
         <IconButton
           color="inherit"
