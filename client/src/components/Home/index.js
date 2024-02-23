@@ -1,78 +1,37 @@
-import * as React from 'react';
+import React from 'react';
+import Navigation from '../Navigation';
+import SearchBar from './SearchBar';
+import Box from '@mui/material/Box';
 
-import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider, styled } from '@mui/material/styles'
-import Grid from "@mui/material/Grid";
-import CssBaseline from '@mui/material/CssBaseline';
-import callApiLoadUserSettings from './callApiLoadUserSettings.js';
-const serverURL = "";
+const Landing = () => {
+  const [courses, setCourses] = React.useState([]);
 
-
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
-
-const Home = () => {
-
-  const [userID, setUserID] = React.useState(1);
-  const [mode, setMode] = React.useState(0);
-
-  
   React.useEffect(() => {
-    //loadUserSettings();
+    callApiLoadCourses().then(res => {
+      const data = JSON.parse(res.express);
+      const formattedCourses = data.map(course => `${course.courseCode}: ${course.courseTitle}`);
+      setCourses(formattedCourses);
+    });
   }, []);
-  
-  const loadUserSettings = () => {
-    callApiLoadUserSettings(serverURL, userID)
-      .then(res => {
-        //console.log("parsed: ", res[0].mode)
-        setMode(res[0].mode);
-      });
-  }
+
+  const callApiLoadCourses = async () => {
+    const url = '/api/getCourses';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+    });
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Grid
-        container
-        spacing={0}
-        direction="column"
-        justify="flex-start"
-        alignItems="flex-start"
-        sx={{ 
-          minHeight: '100vh',
-          marginTop: theme.spacing(8),
-          marginLeft: theme.spacing(4)
-        }}
-      >
-        <Grid item>
-
-          <Typography
-            variant={"h3"}
-          >
-
-            {mode === 0 ? (
-              <React.Fragment>
-                Welcome to MSci245!
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                Welcome back!
-              </React.Fragment>
-            )}
-
-          </Typography>
-
-        </Grid>
-      </Grid>
-    </ThemeProvider>
+    <>
+      <Navigation />
+      <Box align="center" sx={{marginTop: '50px', marginBottom: '100px'}}>
+        <SearchBar courses={courses}/>
+      </Box>
+    </>
   );
-}
-
-
-
-
-export default Home;
+};
+export default Landing;
