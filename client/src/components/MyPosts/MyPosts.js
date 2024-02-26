@@ -3,20 +3,18 @@ import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navigation from "../Navigation";
 
-const MyProfile = () => {
+const MyPosts = () => {
     const navigate = useNavigate();
 
     return (
         <>
             <Navigation />
             <div style={{ margin: '20px' }}>
-                My Profile
-                <div style={{ marginTop: '20px' }}>
-                    <Button variant="contained" onClick={() => navigate('/myposts')}>My Posts</Button>
-                </div>
+                <h1>My Posts</h1>
+                <Button variant="contained" onClick={() => navigate(-1)}>Back</Button>
             </div>
         </>
     );
 }
 
-export default MyProfile;
+export default MyPosts;
