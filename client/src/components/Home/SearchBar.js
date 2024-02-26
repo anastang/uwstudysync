@@ -1,12 +1,25 @@
 import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import { useNavigate } from 'react-router-dom';
+
 
 function SearchBar({courses}) {
+  const navigate = useNavigate();
+
+  const handleCourseSelection = (event, value) => {
+    if (value) {
+      // Redirect to the course page using its ID
+      navigate(`/course/${value.id}`);
+    }
+  };
+
   return (
     <Autocomplete
       options={courses}
       noOptionsText="No results"
+      onChange={handleCourseSelection}
+      getOptionLabel={(option) => option.title}
       sx={{
         width: {
           xs: '80%',
