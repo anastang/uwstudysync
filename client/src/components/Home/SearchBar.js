@@ -2,8 +2,10 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useNavigate } from 'react-router-dom';
+import Paper from '@mui/material/Paper';
 
 
+// open downwards
 function SearchBar({courses}) {
   const navigate = useNavigate();
 
@@ -17,9 +19,19 @@ function SearchBar({courses}) {
   return (
     <Autocomplete
       options={courses}
-      noOptionsText="No results"
+      noOptionsText="No Results"
       onChange={handleCourseSelection}
       getOptionLabel={(option) => option.title}
+      PaperComponent={({ children }) => (
+        <Paper style={{ position: 'relative', top: '100%' }} >
+          {children}
+        </Paper>
+      )}
+      // PaperComponent={({ children }) => (
+      //   <Paper style={{ position: 'absolute' }}>
+      //     {children}
+      //   </Paper>
+      // )}
       sx={{
         width: {
           xs: '80%',
@@ -29,21 +41,24 @@ function SearchBar({courses}) {
         },
         '& .MuiOutlinedInput-root': {
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#00695f',
+            borderColor: '#000000',
           },
         },
         '& .Mui-focused': {
-          color: '#00695f',
+          color: '#cccccc',
         },
       }}
-      renderInput={params => (
+      renderInput={(params) => (
         <TextField
           {...params}
           label="Search Courses"
+          InputLabelProps={{ style: { color: 'white' } }}
           InputProps={{
             ...params.InputProps,
-            style: {color: 'black'}
+            style: { color: 'white' },  
           }}
+          variant="outlined"
+          sx={{ borderColor: '#000000' }}
         />
       )}
     />
