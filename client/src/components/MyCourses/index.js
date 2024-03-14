@@ -4,7 +4,9 @@ const MyCourses = () => {
     return (
         <>
             <Navigation/>
-            MyCourses
+            <div style={{ margin: '20px' }}>
+                My Courses
+            </div>
         </>
     )
 }
