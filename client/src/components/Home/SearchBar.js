@@ -58,7 +58,7 @@ function SearchBar({courses}) {
             style: { color: 'white' },  
           }}
           variant="outlined"
-          sx={{ borderColor: '#000000' }}
+          sx={{ borderColor: '#000000', backgroundColor: '#192124' }}
         />
       )}
     />
