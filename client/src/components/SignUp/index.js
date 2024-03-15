@@ -30,7 +30,6 @@ const SignUp = () => {
       lastName: data.get('lastName'),
       email: data.get('email'),
       password: data.get('password'),
-      allowExtraEmails: data.get('allowExtraEmails'),
     });
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -113,13 +112,6 @@ const SignUp = () => {
                     type="password"
                     id="password"
                     autoComplete="new-password"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={<Checkbox value="allowExtraEmails" color="primary" />}
-                    label="I want to receive inspiration, marketing promotions and updates via email."
-                    name="allowExtraEmails"
                   />
                 </Grid>
               </Grid>
