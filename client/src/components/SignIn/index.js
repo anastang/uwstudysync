@@ -85,6 +85,10 @@ const SignIn = () => {
                 id="password"
                 autoComplete="current-password"
               />
+
+                {/* // implement remember me? */}
+
+
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
@@ -98,6 +102,9 @@ const SignIn = () => {
                 Sign In
               </Button>
               <Grid container>
+
+                {/* // implement forgot password? */}
+
                 <Grid item xs>
                   <Link href="#" variant="body2">
                     Forgot password?
