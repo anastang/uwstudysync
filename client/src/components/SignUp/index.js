@@ -28,6 +28,8 @@ const SignUp = () => {
     const userData = {
         email: data.get('email'),
         password: data.get('password'),
+        firstName: data.get('firstName'),
+        lastName: data.get('lastName')
     };
     
     // Perform password length validation
@@ -53,8 +55,11 @@ const SignUp = () => {
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
                 data.get('email'),
-                data.get('password')
+                data.get('password'),
+                data.get('firstName'),
+                data.get('lastName')
             );
+            localStorage.setItem('firstName', data.get('firstName'));
             const user = userCredential.user;
             console.log('User registered successfully:', user);
             navigate('/'); // Redirect to home after sign-up

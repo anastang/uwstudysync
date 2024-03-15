@@ -21,7 +21,7 @@ const connection = mysql.createConnection(config);
 connection.connect();
 
 app.post('/api/register', (req, res) => {
-	const { email, password } = req.body;
+	const { email, password, firstName, lastName } = req.body;
   
 	// Check if the email already exists in the database
 	connection.query('SELECT * FROM user WHERE email = ?', email, (error, results) => {
@@ -36,8 +36,8 @@ app.post('/api/register', (req, res) => {
 	  }
   
 	  // If the email is unique, proceed with user registration
-	  const sql = 'INSERT INTO user (email, password) VALUES (?, ?)';
-	  const values = [email, password];
+	  const sql = 'INSERT INTO user (email, password, firstName, lastName) VALUES (?, ?, ?, ?)';
+	  const values = [email, password, firstName, lastName];
 	
 	  // Execute the query to insert data into the "user" table
 	  connection.query(sql, values, (insertError) => {
