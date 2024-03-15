@@ -15,7 +15,11 @@ import MenuItem from '@mui/material/MenuItem';
 const pages = [ 
   {name: 'Home', path: '/'},
   {name: 'My Courses', path: '/mycourses'},
-  {name: 'My Profile', path: '/myprofile'}
+  {name: 'My Profile', path: '/myprofile'},
+  {name: 'Notifications', path: '/notifications'},
+  {name: 'Sign In', path: '/signin'},
+  {name: 'Sign Up', path: '/signup'},
+
 ];
 
 const Navigation = () => {

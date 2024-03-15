@@ -23,6 +23,8 @@ function SearchBar({courses, label, selectedCourse, setSelectedCourse}) {
             ...params.InputProps,
             style: {color: 'black'}
           }}
+          variant="outlined"
+          sx={{ borderColor: '#000000', backgroundColor: '#192124' }}
         />
       )}
       onChange={(event, value) => {
