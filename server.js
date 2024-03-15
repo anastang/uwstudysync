@@ -6,6 +6,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
 import response from 'express';
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+      cb(null, 'client/public/posts/')
+    },
+    filename: function(req, file, cb) {
+      const uniqueSuffix = uuidv4();
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+    }
+});
+const upload = multer({ storage: storage });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,42 +64,72 @@ app.post('/api/register', (req, res) => {
 	});
   });
 
-// app.post('/api/getCourses', (req, res) => {
-// 	let connection = mysql.createConnection(config);
 
-// 	const sql = `SELECT courseCode, courseTitle FROM courses`;
+app.post('/api/uploadPost', upload.single('file'), (req, res) => {
+    const { course, title, description, fileType } = req.body;
+    const file = req.file;
+    const sql = `INSERT INTO posts (course, title, description, file, file_type, date_posted) VALUES (?, ?, ?, ?, ?, NOW())`;
+    const fileURL = `/posts/${file.filename}`;
+    const data = [course, title, description, fileURL, fileType];
+    let connection = mysql.createConnection(config);
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        return res.status(200).json({ success: true, filePath: file.path });
+    });
+});
 
-// 	connection.query(sql, (error, results, fields) => {
-// 		if (error) {
-// 			return console.error(error.message);
-// 		}
-// 		let string = JSON.stringify(results);
-// 		res.send({ express: string });
-// 	});
-// 	connection.end();
-// });
+app.post('/api/getPosts', (req, res) => {
+    const course = req.body.course;
+    let connection = mysql.createConnection(config);
+    const sql = `SELECT * FROM a86syed.posts WHERE course = ?`;
+    const data = [course];
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        let string = JSON.stringify(results);
+		res.send({ express: string });
+    });
+});
 
-// // API to add a review to the database
-// app.post('/api/addReview', (req, res) => {
-// 	const { userID, movieID, reviewTitle, reviewContent, reviewScore } = req.body;
+app.post('/api/getCourses', (req, res) => {
+	let connection = mysql.createConnection(config);
 
-// 	let connection = mysql.createConnection(config);
+	const sql = `SELECT courseCode, courseTitle FROM courses`;
 
-// 	const sql = `INSERT INTO Review (userID, movieID, reviewTitle, reviewContent, reviewScore) 
-// 				 VALUES (?, ?, ?, ?, ?)`;
+	connection.query(sql, (error, results, fields) => {
+		if (error) {
+			return console.error(error.message);
+		}
+		let string = JSON.stringify(results);
+		res.send({ express: string });
+	});
+	connection.end();
+});
 
-// 	const data = [userID, movieID, reviewTitle, reviewContent, reviewScore];
-
-// 	connection.query(sql, data, (error, results, fields) => {
-// 		if (error) {
-// 			console.error("Error adding review:", error.message);
-// 			return res.status(500).json({ error: "Error adding review to the database" });
-// 		}
-
-// 		return res.status(200).json({ success: true });
-// 	});
-// 	connection.end();
-// });
-
+app.post('/api/getPost/:post_id', (req, res) => {
+    const post_id = req.params.post_id;
+    let connection = mysql.createConnection(config);
+    const sql = `SELECT * FROM a86syed.posts WHERE id = ?`;
+    const data = [post_id];
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        let string = JSON.stringify(results);
+		res.send({ express: string });
+    });
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`)); //for the dev version
