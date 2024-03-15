@@ -33,6 +33,13 @@ app.use(express.static(path.join(__dirname, "client/build")));
 const connection = mysql.createConnection(config);
 connection.connect();
 
+// Function to validate email format
+function isValidEmail(email) {
+  // Regular expression for email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 app.post('/api/register', (req, res) => {
 	const { email, password, firstName, lastName } = req.body;
   
@@ -47,6 +54,11 @@ app.post('/api/register', (req, res) => {
 		// If the email already exists, return an error response
 		return res.status(400).json({ message: 'Email already exists' });
 	  }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+  }
   
 	  // If the email is unique, proceed with user registration
 	  const sql = 'INSERT INTO user (email, password, firstName, lastName) VALUES (?, ?, ?, ?)';

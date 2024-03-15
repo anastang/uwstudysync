@@ -45,53 +45,60 @@ const Navigation = () => {
 
 
   return (
-    <AppBar position="static" elevation='1' sx={{backgroundColor: '#009688'}}>
-      <Box sx={{display: 'flex', alignItems: 'center', paddingTop: 0.5}}>
-        <IconButton color="inherit" onClick={handleDrawerOpen}>
-          <MenuIcon sx={{fontSize: '30px'}} />
-        </IconButton>
-        <Drawer
-          anchor="left"
-          open={drawerOpen}
-          onClose={() => handleDrawerOpen(false)}
-          onClick={() => handleDrawerOpen(false)}
-          sx={{'& .MuiDrawer-paper': {width: '250px'}}}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}
+    <AppBar position="static" elevation='1' sx={{backgroundColor: '#161d20', borderBottom: '1px solid black'}}>
+      <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingX: 2}}>
+        {/* Left Section */}
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+          <IconButton color="inherit" onClick={handleDrawerOpen}>
+            <MenuIcon sx={{fontSize: '30px'}} />
+          </IconButton>
+          <Drawer
+            anchor="left"
+            open={drawerOpen}
+            onClose={() => handleDrawerOpen(false)}
+            onClick={() => handleDrawerOpen(false)}
+            sx={{'& .MuiDrawer-paper': {width: '250px'}}}
           >
-            {pages.map((page) => (
-              <Typography
-                component={Link}
-                to={page.path}
-                sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
-              >
-                {page.name}
-              </Typography>
-            ))}
-          </Box>
-        </Drawer>
-
-        <Typography sx={{fontWeight: 700, paddingX: 4}}>{getPage(location.pathname)}</Typography>
-        {/* <Box sx={{marginLeft: '1375px'}}>
-          <Button variant="outlined" component={Link} to={'/signin'}>Sign In</Button>
-        </Box> */}
-
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}
+            >
+              {pages.map((page) => (
+                <Typography
+                  component={Link}
+                  to={page.path}
+                  sx={{marginTop: 4, fontWeight: 700, color: 'inherit', textDecoration: 'none'}}
+                >
+                  {page.name}
+                </Typography>
+              ))}
+            </Box>
+          </Drawer>
+  
+          {/* Typography for Page Title */}
+          <Typography sx={{fontWeight: 700, paddingLeft: 1}}>{getPage(location.pathname)}</Typography>
+        </Box>
+  
+        {/* Middle Section (StudySync) */}
+        <Box sx={{position: 'absolute', left: '50%', transform: 'translateX(-50%)'}}>
+          <Typography variant="h6">
+            StudySync
+          </Typography>
+        </Box>
+  
+        {/* Right Section */}
         <IconButton
           color="inherit"
           component={Link}
           aria-label="account of current user"
           aria-controls="menu-appbar"
           aria-haspopup="true"
-          // to={'/myprofile'}
           onClick={handleProfileMenuOpen}
-          sx={{marginLeft: 'auto'}}
         >
-        <AccountCircle sx={{fontSize: '35px'}} />
+          <AccountCircle sx={{fontSize: '35px'}} />
         </IconButton>
         <Menu
           id="menu-appbar"
@@ -101,11 +108,9 @@ const Navigation = () => {
           open={open}
           onClose={handleMenuClose}
         >
-          {/* <MenuItem onClick={handleMenuClose}>My Profile</MenuItem> */}
           <MenuItem component={Link} to={'/myprofile'} onClick={handleMenuClose}>
             My Profile
           </MenuItem>
-          {/* <MenuItem onClick={handleMenuClose}>Notifications</MenuItem> */}
           <MenuItem component={Link} to={'/notifications'} onClick={handleMenuClose}>
             Notifications
           </MenuItem>
@@ -113,9 +118,9 @@ const Navigation = () => {
             Sign In
           </MenuItem>
         </Menu>
-
       </Box>
     </AppBar>
   );
+  
 };
 export default Navigation;
