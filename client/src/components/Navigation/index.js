@@ -18,6 +18,8 @@ const pages = [
   {name: 'My Profile', path: '/myprofile'},
   {name: 'Notifications', path: '/notifications'},
   {name: 'Sign In', path: '/signin'},
+  {name: 'Sign Up', path: '/signup'},
+
 ];
 
 const Navigation = () => {

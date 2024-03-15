@@ -6,6 +6,7 @@ import MyProfile from '../MyProfile/index'
 import MyPosts from '../MyPosts/MyPosts'
 import SignIn from '../SignIn/index'
 import Notifications from '../Notifications/index'
+import SignUp from '../SignUp';
 
 
 
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/myposts" element={<MyPosts />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/signup" element={<SignUp />} />
 
 
         </Routes>
