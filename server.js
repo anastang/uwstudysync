@@ -103,7 +103,7 @@ app.post('/api/getPosts', (req, res) => {
 app.post('/api/getCourses', (req, res) => {
 	let connection = mysql.createConnection(config);
 
-	const sql = `SELECT courseCode, courseTitle FROM courses`;
+	const sql = `SELECT courseCode, courseTitle FROM a86syed.courses`;
 
 	connection.query(sql, (error, results, fields) => {
 		if (error) {
