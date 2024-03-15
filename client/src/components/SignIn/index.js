@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@mui/material';
+import { Button, Link as MuiLink } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navigation from "../Navigation";
 import Avatar from '@mui/material/Avatar';
@@ -14,21 +14,34 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../Firebase/config';
+import firebase from 'firebase/compat/app'
 
 const defaultTheme = createTheme();
 
 const SignIn = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+    try {
+        const user = await signInWithEmailAndPassword(auth, data.get('email'), data.get('password'))
+        navigate('/'); // Redirect to home after sign-in
+    } catch (error) {
+        console.log(error.message)
+        alert(error.message);
+    }
     // Add your logic for signing in here
-    navigate('/'); // Redirect to home after sign-in
+  };
+
+  const handleSignUpClick = () => {
+    navigate('/signup'); // Redirect to sign-up page
   };
 
   return (
@@ -91,9 +104,9 @@ const SignIn = () => {
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link href="#" variant="body2">
+                    <MuiLink onClick={handleSignUpClick} variant="body2">
                     {"Don't have an account? Sign Up"}
-                  </Link>
+                  </MuiLink>
                 </Grid>
               </Grid>
             </Box>
