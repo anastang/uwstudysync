@@ -64,35 +64,35 @@ app.post('/api/uploadPost', upload.single('file'), (req, res) => {
     });
 });
 
-app.post('/api/uploadPost', upload.single('file'), (req, res) => {
-    const course = req.body.course;
-	const title = req.body.title;
-	const description = req.body.description;
-    const file = req.file;
-    const filePath = file.path;
-    const fs = require('fs');
-    fs.readFile(filePath, (err, fileData) => {
-        if (err) {
-            console.error("Error reading file:", err);
-            return res.status(500).json({ error: "Error processing file" });
-        }
-        let connection = mysql.createConnection(config);
-        const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
-        const data = [course, title, description, fileData];
+// app.post('/api/uploadPost', upload.single('file'), (req, res) => {
+//     const course = req.body.course;
+// 	const title = req.body.title;
+// 	const description = req.body.description;
+//     const file = req.file;
+//     const filePath = file.path;
+//     const fs = require('fs');
+//     fs.readFile(filePath, (err, fileData) => {
+//         if (err) {
+//             console.error("Error reading file:", err);
+//             return res.status(500).json({ error: "Error processing file" });
+//         }
+//         let connection = mysql.createConnection(config);
+//         const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
+//         const data = [course, title, description, fileData];
         
-        connection.query(sql, data, (error, results, fields) => {
-            if (error) {
-                console.error("Error uploading post to DB:", error.message);
-                connection.end();
-                return res.status(500).json({ error: "Error uploading post to DB" });
-            }
-            connection.end();
-            return res.status(200).json({ success: true, message: 'Post uploaded successfully to DB.' });
-        });
-    });
-});
+//         connection.query(sql, data, (error, results, fields) => {
+//             if (error) {
+//                 console.error("Error uploading post to DB:", error.message);
+//                 connection.end();
+//                 return res.status(500).json({ error: "Error uploading post to DB" });
+//             }
+//             connection.end();
+//             return res.status(200).json({ success: true, message: 'Post uploaded successfully to DB.' });
+//         });
+//     });
+// });
 
-app.post('/api/fetchCourseContent', (req, res) => {
+app.post('/api/getPosts', (req, res) => {
     const course = req.body.course;
     console.log(course);
     let connection = mysql.createConnection(config);
@@ -111,7 +111,7 @@ app.post('/api/fetchCourseContent', (req, res) => {
     });
 });
 
-app.get('/api/getPost/:post_id', (req, res) => {
+app.post('/api/getPost/:post_id', (req, res) => {
     const post_id = req.params.post_id;
     let connection = mysql.createConnection(config);
     const sql = `SELECT * FROM a86syed.posts WHERE id = ?`;

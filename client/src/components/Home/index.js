@@ -1,9 +1,9 @@
 import React from 'react';
+import Box from '@mui/material/Box';
 import Navigation from '../Navigation';
 import SearchBar from './SearchBar';
-import Box from '@mui/material/Box';
+import PostsGrid from './PostsGrid';
 import Upload from './Upload';
-import CourseContentGrid from './CourseContentGrid';
 
 const Home = () => {
   const [courses, setCourses] = React.useState([]);
@@ -31,15 +31,15 @@ const Home = () => {
 
   React.useEffect(() => {
     if (selectedCourse) { 
-      callApiLoadCourseContent().then(res => {
+      callApiLoadPosts().then(res => {
         const data = JSON.parse(res.express);
         setPosts(data);
       });
     }
   }, [selectedCourse]);
 
-  const callApiLoadCourseContent = async () => {
-    const url = '/api/fetchCourseContent';
+  const callApiLoadPosts = async () => {
+    const url = '/api/getPosts';
     const response = await fetch(url, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -53,11 +53,12 @@ const Home = () => {
   return (
     <>
       <Navigation />
-      <Box align="center" sx={{marginTop: '50px', marginBottom: '100px'}}>
+      <Box align="center" marginY={'50px'}>
         <SearchBar courses={courses} label="Search Courses" selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse}/>
       </Box>
-      <CourseContentGrid posts={posts}/>
-
+      <Box align="center" marginX={2}>
+        <PostsGrid posts={posts}/>
+      </Box>
       <Upload courses={courses}/>
     </>
   );

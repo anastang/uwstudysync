@@ -30,7 +30,7 @@ const Navigation = () => {
   const location = useLocation();
   const getPage = (path) => {
     const page = pages.find(page => page.path === path);
-    return page ? page.name : 'Page Not Found';
+    return page ? page.name : '';
   };
 
   const handleProfileMenuOpen = (event) => {
