@@ -37,7 +37,6 @@ const SignIn = () => {
         console.log(error.message)
         alert(error.message);
     }
-    // Add your logic for signing in here
   };
 
   const handleSignUpClick = () => {
