@@ -13,18 +13,28 @@ function SearchBar({courses, label, selectedCourse, setSelectedCourse}) {
           sm: '70%',
           md: '60%',
           lg: '50%',
-        }
+        },
+        '& .MuiOutlinedInput-root': {
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#000000',
+          },
+        },
+        '& .Mui-focused': {
+          color: '#cccccc',
+        },
       }}
       renderInput={params => (
         <TextField
           {...params}
           label={label}
+          InputLabelProps={{ style: { color: 'white' } }}
           InputProps={{
             ...params.InputProps,
-            style: {color: 'black'}
+            style: {color: 'white'}
           }}
           variant="outlined"
           sx={{ borderColor: '#000000', backgroundColor: '#192124' }}
+
         />
       )}
       onChange={(event, value) => {
