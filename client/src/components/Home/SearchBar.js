@@ -24,7 +24,6 @@ function SearchBar({courses, label, selectedCourse, setSelectedCourse}) {
             style: {color: 'black'}
           }}
           variant="outlined"
-          sx={{ borderColor: '#000000', backgroundColor: '#192124' }}
         />
       )}
       onChange={(event, value) => {
