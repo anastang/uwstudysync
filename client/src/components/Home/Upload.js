@@ -10,11 +10,16 @@ import Button from '@mui/material/Button';
 import SearchBar from './SearchBar';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
 
 const Upload = ({courses}) => {
 
     const [selectedCourse, setSelectedCourse] = React.useState();
     const [file, setFile] = React.useState();
+    const [fileType, setFileType] = React.useState('');
     const [title, setTitle] = React.useState('');
     const [description, setDescription] = React.useState('');
 
@@ -27,6 +32,7 @@ const Upload = ({courses}) => {
         const post = new FormData();
         post.append('course', selectedCourse);
         post.append('file', file);
+        post.append('fileType', fileType);
         post.append('title', title);
         post.append('description', description);
         try {
@@ -59,6 +65,15 @@ const Upload = ({courses}) => {
                 <Box sx={{marginTop: "10px"}}>
                     <Typography>Select file:</Typography>
                     <input type="file" onChange={(event) => setFile(event.target.files[0])}/>
+                </Box>
+                <Box sx={{marginTop: "10px"}}>
+                    <Typography>Select file type:</Typography>
+                    <FormControl>
+                        <RadioGroup row value={fileType} onChange={(event) => {setFileType(event.target.value)}}>
+                            <FormControlLabel value="IMG" control={<Radio />} label="IMG (JPG, PNG, etc)" />
+                            <FormControlLabel value="PDF" control={<Radio />} label="PDF" />
+                        </RadioGroup>
+                    </FormControl>
                 </Box>
                 <Box sx={{marginTop: "10px"}}>
                     <Typography>Add a title:</Typography>

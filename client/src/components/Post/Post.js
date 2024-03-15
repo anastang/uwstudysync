@@ -1,10 +1,12 @@
 import { useParams } from 'react-router-dom';
 import React from "react";
 import Grid from "@mui/material/Grid";
-import { Button, TextField, Typography, Rating } from '@mui/material';
+import { Button, TextField, Typography, Rating, Paper } from '@mui/material';
 import Navigation from '../Navigation';
 import { format } from 'date-fns';
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const Post = () => {
@@ -57,14 +59,25 @@ const Post = () => {
                     <Grid item xs={12} margin={3}>
                         <Typography sx={{ fontWeight: 700, fontSize: '30px' }}>{post.title}</Typography>
                     </Grid>
-                    <Document file={post.file} onLoadSuccess={onDocumentLoadSuccess}>
-                        <Page pageNumber={pageNumber} />
-                    </Document>
-                    <div>
-                        <Button disabled={pageNumber <= 1} onClick={previousPage}>Previous</Button>
-                        <Button disabled={pageNumber >= numPages} onClick={nextPage}>Next</Button>
-                    </div>
-                    <Typography>Page {pageNumber} of {numPages}</Typography>
+                    {post.file_type === "PDF" &&
+                        <Grid item xs={12} margin={3}>
+                        <Paper>
+                            <Document file={post.file} onLoadSuccess={onDocumentLoadSuccess}>
+                                <Page pageNumber={pageNumber}  />
+                            </Document>
+                        </Paper>
+                        <div>
+                            <Button disabled={pageNumber <= 1} onClick={previousPage}>Previous</Button>
+                            <Button disabled={pageNumber >= numPages} onClick={nextPage}>Next</Button>
+                        </div>
+                        <Typography>Page {pageNumber} of {numPages}</Typography>
+                        </Grid>
+                    }
+                    {post.file_type === "IMG" &&
+                        <Grid item xs={12} margin={3}>
+                            <img src={post.file} style={{width: "80%"}}></img>
+                        </Grid>
+                    }
                     <Grid item xs={12} margin={3}>
                         <Typography>Description: {post.description}</Typography>
                     </Grid>

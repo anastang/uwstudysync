@@ -47,11 +47,11 @@ app.post('/api/getCourses', (req, res) => {
 
 
 app.post('/api/uploadPost', upload.single('file'), (req, res) => {
-    const { course, title, description } = req.body;
+    const { course, title, description, fileType } = req.body;
     const file = req.file;
-    const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
+    const sql = `INSERT INTO posts (course, title, description, file, file_type, date_posted) VALUES (?, ?, ?, ?, ?, NOW())`;
     const fileURL = `/posts/${file.filename}`;
-    const data = [course, title, description, fileURL];
+    const data = [course, title, description, fileURL, fileType];
     let connection = mysql.createConnection(config);
     connection.query(sql, data, (error, results, fields) => {
         if (error) {
@@ -94,7 +94,6 @@ app.post('/api/uploadPost', upload.single('file'), (req, res) => {
 
 app.post('/api/getPosts', (req, res) => {
     const course = req.body.course;
-    console.log(course);
     let connection = mysql.createConnection(config);
     const sql = `SELECT * FROM a86syed.posts WHERE course = ?`;
     const data = [course];
@@ -106,7 +105,6 @@ app.post('/api/getPosts', (req, res) => {
         }
         connection.end();
         let string = JSON.stringify(results);
-        console.log(string);
 		res.send({ express: string });
     });
 });
@@ -124,10 +122,8 @@ app.post('/api/getPost/:post_id', (req, res) => {
         }
         connection.end();
         let string = JSON.stringify(results);
-        console.log(string);
 		res.send({ express: string });
     });
 });
-
 
 app.listen(port, () => console.log(`Listening on port ${port}`)); //for the dev version
