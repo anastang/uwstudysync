@@ -42,7 +42,7 @@ const Navigation = () => {
 
 
   return (
-    <AppBar position="static" elevation='1' sx={{backgroundColor: '#161d20', borderBottom: '1px solid black'}}>
+    <AppBar position="static" elevation='1' sx={{backgroundColor: '#009688'}}>
       <Box sx={{display: 'flex', alignItems: 'center', paddingTop: 0.5}}>
         <IconButton color="inherit" onClick={handleDrawerOpen}>
           <MenuIcon sx={{fontSize: '30px'}} />
@@ -90,7 +90,7 @@ const Navigation = () => {
         >
         <AccountCircle sx={{fontSize: '35px'}} />
         </IconButton>
-        <Menu
+        {/* <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -98,18 +98,19 @@ const Navigation = () => {
           open={open}
           onClose={handleMenuClose}
         >
-          {/* <MenuItem onClick={handleMenuClose}>My Profile</MenuItem> */}
+          <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
           <MenuItem component={Link} to={'/myprofile'} onClick={handleMenuClose}>
             My Profile
           </MenuItem>
-          {/* <MenuItem onClick={handleMenuClose}>Notifications</MenuItem> */}
+          <MenuItem onClick={handleMenuClose}>Notifications</MenuItem>
           <MenuItem component={Link} to={'/notifications'} onClick={handleMenuClose}>
             Notifications
           </MenuItem>
           <MenuItem component={Link} to={'/signin'} onClick={handleMenuClose}>
             Sign In
           </MenuItem>
-        </Menu>
+        </Menu> 
+        */}
 
       </Box>
     </AppBar>

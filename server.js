@@ -6,6 +6,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
 import response from 'express';
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+      cb(null, 'client/public/posts/')
+    },
+    filename: function(req, file, cb) {
+      const uniqueSuffix = uuidv4();
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+    }
+});
+const upload = multer({ storage: storage });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,26 +45,88 @@ app.post('/api/getCourses', (req, res) => {
 	connection.end();
 });
 
-// API to add a review to the database
-app.post('/api/addReview', (req, res) => {
-	const { userID, movieID, reviewTitle, reviewContent, reviewScore } = req.body;
 
-	let connection = mysql.createConnection(config);
+app.post('/api/uploadPost', upload.single('file'), (req, res) => {
+    const { course, title, description } = req.body;
+    const file = req.file;
+    const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
+    const fileURL = `/posts/${file.filename}`;
+    const data = [course, title, description, fileURL];
+    let connection = mysql.createConnection(config);
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        return res.status(200).json({ success: true, filePath: file.path });
+    });
+});
 
-	const sql = `INSERT INTO Review (userID, movieID, reviewTitle, reviewContent, reviewScore) 
-				 VALUES (?, ?, ?, ?, ?)`;
+app.post('/api/uploadPost', upload.single('file'), (req, res) => {
+    const course = req.body.course;
+	const title = req.body.title;
+	const description = req.body.description;
+    const file = req.file;
+    const filePath = file.path;
+    const fs = require('fs');
+    fs.readFile(filePath, (err, fileData) => {
+        if (err) {
+            console.error("Error reading file:", err);
+            return res.status(500).json({ error: "Error processing file" });
+        }
+        let connection = mysql.createConnection(config);
+        const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
+        const data = [course, title, description, fileData];
+        
+        connection.query(sql, data, (error, results, fields) => {
+            if (error) {
+                console.error("Error uploading post to DB:", error.message);
+                connection.end();
+                return res.status(500).json({ error: "Error uploading post to DB" });
+            }
+            connection.end();
+            return res.status(200).json({ success: true, message: 'Post uploaded successfully to DB.' });
+        });
+    });
+});
 
-	const data = [userID, movieID, reviewTitle, reviewContent, reviewScore];
+app.post('/api/fetchCourseContent', (req, res) => {
+    const course = req.body.course;
+    console.log(course);
+    let connection = mysql.createConnection(config);
+    const sql = `SELECT * FROM a86syed.posts WHERE course = ?`;
+    const data = [course];
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        let string = JSON.stringify(results);
+        console.log(string);
+		res.send({ express: string });
+    });
+});
 
-	connection.query(sql, data, (error, results, fields) => {
-		if (error) {
-			console.error("Error adding review:", error.message);
-			return res.status(500).json({ error: "Error adding review to the database" });
-		}
-
-		return res.status(200).json({ success: true });
-	});
-	connection.end();
+app.get('/api/getPost/:post_id', (req, res) => {
+    const post_id = req.params.post_id;
+    let connection = mysql.createConnection(config);
+    const sql = `SELECT * FROM a86syed.posts WHERE id = ?`;
+    const data = [post_id];
+    connection.query(sql, data, (error, results, fields) => {
+        if (error) {
+            console.error("Error uploading post:", error.message);
+            connection.end();
+            return res.status(500).json({ error: "Error uploading post" });
+        }
+        connection.end();
+        let string = JSON.stringify(results);
+        console.log(string);
+		res.send({ express: string });
+    });
 });
 
 
