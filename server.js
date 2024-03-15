@@ -144,4 +144,70 @@ app.post('/api/getPost/:post_id', (req, res) => {
     });
 });
 
+app.post('/api/posts/:post_id/comments', (req, res) => {
+    const { post_id } = req.params;
+    const { comment } = req.body;
+
+    const sql = 'INSERT INTO comments (post_id, comment) VALUES (?, ?)';
+    const data = [post_id, comment];
+
+    let connection = mysql.createConnection(config);
+    connection.query(sql, data, (error, results) => {
+        connection.end();
+        if (error) {
+            return res.status(500).json({ error: "Error posting comment" });
+        }
+        res.status(200).json({ success: true, message: 'Comment added successfully.' });
+    });
+});
+
+app.get('/api/posts/:post_id/comments', (req, res) => {
+    const { post_id } = req.params;
+    const sql = 'SELECT * FROM comments WHERE post_id = ? ORDER BY created_at DESC';
+    let connection = mysql.createConnection(config);
+    connection.query(sql, [post_id], (error, results) => {
+        connection.end();
+        if (error) {
+            return res.status(500).json({ error: "Error fetching comments" });
+        }
+        res.status(200).json({ comments: results });
+    });
+});
+
+app.post('/api/posts/:post_id/ratings', (req, res) => {
+    const { post_id } = req.params;
+    const { rating } = req.body;
+
+    if(rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
+
+    const sql = 'INSERT INTO ratings (post_id, rating) VALUES (?, ?)';
+    const data = [post_id, rating];
+
+    let connection = mysql.createConnection(config);
+    connection.query(sql, data, (error, results) => {
+        connection.end();
+        if (error) {
+            return res.status(500).json({ error: "Error posting rating" });
+        }
+        res.status(200).json({ success: true, message: 'Rating added successfully.' });
+    });
+});
+
+app.get('/api/posts/:post_id/averageRating', (req, res) => {
+    const { post_id } = req.params;
+    
+    const sql = 'SELECT AVG(rating) AS averageRating FROM ratings WHERE post_id = ?';
+    let connection = mysql.createConnection(config);
+    connection.query(sql, [post_id], (error, results) => {
+        connection.end();
+        if (error) {
+            return res.status(500).json({ error: "Error calculating average rating" });
+        }
+        res.status(200).json({average: results[0].averageRating});
+    });
+});
+
+
 app.listen(port, () => console.log(`Listening on port ${port}`)); //for the dev version

@@ -1,105 +1,171 @@
+import React, { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
-import React from "react";
-import Grid from "@mui/material/Grid";
-import { Button, TextField, Typography, Rating, Paper } from '@mui/material';
-import Navigation from '../Navigation';
-import { format } from 'date-fns';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+import { Button, TextField, Typography, Rating, Paper, Box, Snackbar } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
 const Post = () => {
     let { post_id } = useParams();
-    const [post, setPost] = React.useState();
+    const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [rating, setRating] = useState(5); // Default rating value
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
-    const [numPages, setNumPages] = React.useState(null);
-    const [pageNumber, setPageNumber] = React.useState(1); // Current page number
+    useEffect(() => {
+        const loadPostData = async () => {
+            const response = await fetch(`/api/getPost/${post_id}`);
+            const postData = await response.json();
+            if (response.ok) {
+                setPost(postData.express ? JSON.parse(postData.express)[0] : {});
+            }
+        };
 
-    const onDocumentLoadSuccess = ({ numPages }) => {
-        setNumPages(numPages);
-    };
+        const loadComments = async () => {
+            const response = await fetch(`/api/posts/${post_id}/comments`);
+            const data = await response.json();
+            if (response.ok) {
+                setComments(data.comments);
+            }
+        };
 
-    React.useEffect(() => {
-        callApiLoadPost(post_id).then(res => {
-            const data = JSON.parse(res.express);
-            setPost(data[0]);
-        });
+        const loadAverageRating = async () => {
+            const response = await fetch(`/api/posts/${post_id}/averageRating`);
+            const data = await response.json();
+            if (response.ok) {
+                setAverageRating(data.average);
+            }
+        };
+
+        loadPostData();
+        loadComments();
+        loadAverageRating();
     }, [post_id]);
 
-    const callApiLoadPost = async (post_id) => {
-        const url = `/api/getPost/${post_id}`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-        });
-        const body = await response.json();
-        if (response.status !== 200) throw Error(body.message);
-        return body;
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarOpen(false);
     };
 
-    const changePage = (offset) => {
-        setPageNumber(prevPageNumber => prevPageNumber + offset);
+    const submitComment = async () => {
+        try {
+            const response = await fetch(`/api/posts/${post_id}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ comment }),
+            });
+
+            setComment('');
+
+            if (response.ok) {
+                const newData = await fetch(`/api/posts/${post_id}/comments`);
+                const data = await newData.json();
+                setComments(data.comments);
+                setSnackbarMessage('Comment submitted successfully!');
+                setSnackbarOpen(true);
+            } else {
+                console.error('Failed to submit comment');
+            }
+        } catch (error) {
+            console.error('Error submitting comment:', error);
+        }
+    };
+
+    const submitRating = async () => {
+        try {
+            await fetch(`/api/posts/${post_id}/ratings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rating }),
+            });
+            const response = await fetch(`/api/posts/${post_id}/averageRating`);
+            const data = await response.json();
+            if (response.ok) {
+                setAverageRating(data.average);
+                setSnackbarMessage('Rating submitted successfully!');
+                setSnackbarOpen(true);
+            } else {
+                console.error('Failed to submit rating');
+            }
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+        }
+    };
+
+    if (!post) {
+        return <Typography>Loading...</Typography>;
     }
 
-    const previousPage = () => {
-        changePage(-1);
-    }
+    return (
+        <Box sx={{ flexGrow: 1, padding: 4 }}>
+            <Paper elevation={3} sx={{ padding: 3, marginBottom: 4 }}>
+                <Typography variant="h4" gutterBottom>
+                    {post.title}
+                </Typography>
+                <img src={post.file} alt={post.title} style={{ width: '100%', maxHeight: '500px', objectFit: 'cover', marginBottom: '20px' }} />
+                <Typography variant="body1" gutterBottom>
+                    {post.description}
+                </Typography>
+                <Typography variant="caption" display="block" gutterBottom>
+                    {`Posted on: ${post.date_posted}`}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
+                    <Typography component="legend">Rate this post:</Typography>
+                    <Rating
+                        name="post-rating"
+                        value={rating}
+                        onChange={(event, newValue) => setRating(newValue)}
+                    />
+                    <Button variant="contained" color="primary" onClick={submitRating}>
+                        Submit Rating
+                    </Button>
+                    <Typography variant="subtitle1">({averageRating.toFixed(1)})</Typography>
+                </Box>
+            </Paper>
 
-    const nextPage = () => {
-        changePage(1);
-    }
+            <TextField
+                label="Leave a comment"
+                multiline
+                rows={4}
+                fullWidth
+                variant="outlined"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                margin="normal"
+                sx={{ marginBottom: 2 }}
+            />
+            <Button variant="contained" color="primary" onClick={submitComment} sx={{ marginBottom: 4 }}>
+                Submit Comment
+            </Button>
 
-    if (post) { 
-        return (
-            <>
-            <Navigation/>
-            <Grid container>
-                <Grid item xs={8}>
-                    <Grid item xs={12} margin={3}>
-                        <Typography sx={{ fontWeight: 700, fontSize: '30px' }}>{post.title}</Typography>
-                    </Grid>
-                    {post.file_type === "PDF" &&
-                        <Grid item xs={12} margin={3}>
-                        <Paper>
-                            <Document file={post.file} onLoadSuccess={onDocumentLoadSuccess}>
-                                <Page pageNumber={pageNumber}  />
-                            </Document>
-                        </Paper>
-                        <div>
-                            <Button disabled={pageNumber <= 1} onClick={previousPage}>Previous</Button>
-                            <Button disabled={pageNumber >= numPages} onClick={nextPage}>Next</Button>
-                        </div>
-                        <Typography>Page {pageNumber} of {numPages}</Typography>
-                        </Grid>
-                    }
-                    {post.file_type === "IMG" &&
-                        <Grid item xs={12} margin={3}>
-                            <img src={post.file} style={{width: "80%"}}></img>
-                        </Grid>
-                    }
-                    <Grid item xs={12} margin={3}>
-                        <Typography>Description: {post.description}</Typography>
-                    </Grid>
-                    <Grid item xs={12} margin={3}>
-                        <Typography>Date Posted: {format(new Date(post.date_posted), 'MM-dd-yyyy')}</Typography>
-                    </Grid>
-                </Grid>
-                <Grid item xs={4}>
-                    <Grid item xs={12} margin={3}>
-                        <Typography sx={{ fontWeight: 700, fontSize: '30px' }}>Review this post</Typography>
-                    </Grid>
-                    <Grid item xs={12} margin={3}>
-                        Rating:
-                        <Rating/>
-                    </Grid>
-                    <Grid item xs={12} margin={3}>
-                        Comments: <TextField multiline rows={8} sx={{width:"100%"}}/>
-                    </Grid>
-                </Grid>
-            </Grid>
-            </>
-        );
-    }
-}
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <MuiAlert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </MuiAlert>
+            </Snackbar>
+
+            {Array.isArray(comments) && comments.length > 0 && (
+                <Typography variant="h6" style={{ marginTop: '20px', marginBottom: '10px' }}>Comments:</Typography>
+            )}
+            {Array.isArray(comments) && comments.map((comment, index) => (
+                <Paper key={index} elevation={2} sx={{ padding: 2, marginBottom: 2 }}>
+                    <Typography variant="body1">
+                        {comment.comment}
+                    </Typography>
+                </Paper>
+            ))}
+            {Array.isArray(comments) && comments.length === 0 && (
+                <Typography variant="subtitle1" style={{ marginTop: '20px' }}>No comments yet.</Typography>
+            )}
+        </Box>
+    );
+};
+
 export default Post;
