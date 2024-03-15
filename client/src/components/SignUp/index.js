@@ -25,26 +25,50 @@ const SignUp = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      firstName: data.get('firstName'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        data.get('email'),
-        data.get('password')
-      );
-      const user = userCredential.user;
-      console.log(user);
-      navigate('/'); // Redirect to home after sign-up
-    } catch (error) {
-      console.error(error.message);
-      alert(error.message);
+    const userData = {
+        email: data.get('email'),
+        password: data.get('password'),
+    };
+    
+    // Perform password length validation
+    if (userData.password.length < 6) {
+        console.error('Password must be at least 6 characters long');
+        alert('Password must be at least 6 characters long');
+        return; // Exit the function if password is invalid
     }
-  };
+
+    try {
+        // Create a fetch request to server's /api/register endpoint
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // If registration is successful, proceed with Firebase registration
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                data.get('email'),
+                data.get('password')
+            );
+            const user = userCredential.user;
+            console.log('User registered successfully:', user);
+            navigate('/'); // Redirect to home after sign-up
+        } else {
+            // If registration fails, display an error message
+            const errorData = await response.json();
+            console.error('Failed to register user:', errorData.message);
+            alert('Failed to register user: ' + errorData.message);
+        }
+    } catch (error) {
+        console.error('Error during registration:', error.message);
+        alert('Error during registration: ' + error.message);
+    }
+};
 
   const handleSignInClick = () => {
     navigate('/signin'); // Redirect to sign-in page
