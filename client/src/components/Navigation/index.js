@@ -7,7 +7,6 @@ import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
-import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 
@@ -94,7 +93,7 @@ const Navigation = () => {
         >
         <AccountCircle sx={{fontSize: '35px'}} />
         </IconButton>
-        {/* <Menu
+        <Menu
           id="menu-appbar"
           anchorEl={anchorEl}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -102,19 +101,18 @@ const Navigation = () => {
           open={open}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleMenuClose}>My Profile</MenuItem>
+          {/* <MenuItem onClick={handleMenuClose}>My Profile</MenuItem> */}
           <MenuItem component={Link} to={'/myprofile'} onClick={handleMenuClose}>
             My Profile
           </MenuItem>
-          <MenuItem onClick={handleMenuClose}>Notifications</MenuItem>
+          {/* <MenuItem onClick={handleMenuClose}>Notifications</MenuItem> */}
           <MenuItem component={Link} to={'/notifications'} onClick={handleMenuClose}>
             Notifications
           </MenuItem>
           <MenuItem component={Link} to={'/signin'} onClick={handleMenuClose}>
             Sign In
           </MenuItem>
-        </Menu> 
-        */}
+        </Menu>
 
       </Box>
     </AppBar>
