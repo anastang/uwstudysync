@@ -151,7 +151,6 @@ const Post = () => {
                 </MuiAlert>
             </Snackbar>
 
-            {/* Enhanced Comments section */}
             {Array.isArray(comments) && comments.length > 0 && (
                 <Typography variant="h6" style={{ marginTop: '20px', marginBottom: '10px' }}>Comments:</Typography>
             )}

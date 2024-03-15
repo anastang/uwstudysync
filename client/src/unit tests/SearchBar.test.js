@@ -4,7 +4,10 @@ import SearchBar from '../components/Home/SearchBar';
 
 test('renders Search Courses input', () => {
   const mockCourses = [];
-  render(<SearchBar courses={mockCourses} />);
-  const inputElement = screen.getByLabelText(/Search Courses/i);
+  const label = "Search Courses"
+  render(<SearchBar courses={mockCourses} label={label} />);
+  const inputElement = screen.getByRole('combobox');
   expect(inputElement).toBeInTheDocument();
+  const labelElement = screen.getByLabelText(/Search Courses/i);
+  expect(labelElement).toBeInTheDocument();
 });

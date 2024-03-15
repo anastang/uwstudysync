@@ -30,28 +30,59 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, "client/build")));
 
-app.post('/api/getCourses', (req, res) => {
-	let connection = mysql.createConnection(config);
+const connection = mysql.createConnection(config);
+connection.connect();
 
-	const sql = `SELECT courseCode, courseTitle FROM courses`;
+// Function to validate email format
+function isValidEmail(email) {
+  // Regular expression for email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
-	connection.query(sql, (error, results, fields) => {
-		if (error) {
-			return console.error(error.message);
+app.post('/api/register', (req, res) => {
+	const { email, password, firstName, lastName } = req.body;
+  
+	// Check if the email already exists in the database
+	connection.query('SELECT * FROM user WHERE email = ?', email, (error, results) => {
+	  if (error) {
+		console.error(error);
+		return res.status(500).json({ message: 'Failed to register user' });
+	  }
+  
+	  if (results.length > 0) {
+		// If the email already exists, return an error response
+		return res.status(400).json({ message: 'Email already exists' });
+	  }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+  }
+  
+	  // If the email is unique, proceed with user registration
+	  const sql = 'INSERT INTO user (email, password, firstName, lastName) VALUES (?, ?, ?, ?)';
+	  const values = [email, password, firstName, lastName];
+	
+	  // Execute the query to insert data into the "user" table
+	  connection.query(sql, values, (insertError) => {
+		if (insertError) {
+		  console.error(insertError);
+		  return res.status(500).json({ message: 'Failed to register user' });
 		}
-		let string = JSON.stringify(results);
-		res.send({ express: string });
+		
+		res.status(201).json({ message: 'User registered successfully' });
+	  });
 	});
-	connection.end();
-});
+  });
 
 
 app.post('/api/uploadPost', upload.single('file'), (req, res) => {
-    const { course, title, description } = req.body;
+    const { course, title, description, fileType } = req.body;
     const file = req.file;
-    const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
+    const sql = `INSERT INTO posts (course, title, description, file, file_type, date_posted) VALUES (?, ?, ?, ?, ?, NOW())`;
     const fileURL = `/posts/${file.filename}`;
-    const data = [course, title, description, fileURL];
+    const data = [course, title, description, fileURL, fileType];
     let connection = mysql.createConnection(config);
     connection.query(sql, data, (error, results, fields) => {
         if (error) {
@@ -64,37 +95,8 @@ app.post('/api/uploadPost', upload.single('file'), (req, res) => {
     });
 });
 
-app.post('/api/uploadPost', upload.single('file'), (req, res) => {
+app.post('/api/getPosts', (req, res) => {
     const course = req.body.course;
-	const title = req.body.title;
-	const description = req.body.description;
-    const file = req.file;
-    const filePath = file.path;
-    const fs = require('fs');
-    fs.readFile(filePath, (err, fileData) => {
-        if (err) {
-            console.error("Error reading file:", err);
-            return res.status(500).json({ error: "Error processing file" });
-        }
-        let connection = mysql.createConnection(config);
-        const sql = `INSERT INTO posts (course, title, description, file, date_posted) VALUES (?, ?, ?, ?, NOW())`;
-        const data = [course, title, description, fileData];
-        
-        connection.query(sql, data, (error, results, fields) => {
-            if (error) {
-                console.error("Error uploading post to DB:", error.message);
-                connection.end();
-                return res.status(500).json({ error: "Error uploading post to DB" });
-            }
-            connection.end();
-            return res.status(200).json({ success: true, message: 'Post uploaded successfully to DB.' });
-        });
-    });
-});
-
-app.post('/api/fetchCourseContent', (req, res) => {
-    const course = req.body.course;
-    console.log(course);
     let connection = mysql.createConnection(config);
     const sql = `SELECT * FROM a86syed.posts WHERE course = ?`;
     const data = [course];
@@ -106,12 +108,26 @@ app.post('/api/fetchCourseContent', (req, res) => {
         }
         connection.end();
         let string = JSON.stringify(results);
-        console.log(string);
 		res.send({ express: string });
     });
 });
 
-app.get('/api/getPost/:post_id', (req, res) => {
+app.post('/api/getCourses', (req, res) => {
+	let connection = mysql.createConnection(config);
+
+	const sql = `SELECT courseCode, courseTitle FROM a86syed.courses`;
+
+	connection.query(sql, (error, results, fields) => {
+		if (error) {
+			return console.error(error.message);
+		}
+		let string = JSON.stringify(results);
+		res.send({ express: string });
+	});
+	connection.end();
+});
+
+app.post('/api/getPost/:post_id', (req, res) => {
     const post_id = req.params.post_id;
     let connection = mysql.createConnection(config);
     const sql = `SELECT * FROM a86syed.posts WHERE id = ?`;
@@ -124,7 +140,6 @@ app.get('/api/getPost/:post_id', (req, res) => {
         }
         connection.end();
         let string = JSON.stringify(results);
-        console.log(string);
 		res.send({ express: string });
     });
 });

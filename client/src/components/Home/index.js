@@ -1,9 +1,11 @@
 import React from 'react';
+import Box from '@mui/material/Box';
 import Navigation from '../Navigation';
 import SearchBar from './SearchBar';
-import Box from '@mui/material/Box';
+import PostsGrid from './PostsGrid';
 import Upload from './Upload';
-import CourseContentGrid from './CourseContentGrid';
+import Typography from '@mui/material/Typography';
+
 
 const Home = () => {
   const [courses, setCourses] = React.useState([]);
@@ -31,15 +33,15 @@ const Home = () => {
 
   React.useEffect(() => {
     if (selectedCourse) { 
-      callApiLoadCourseContent().then(res => {
+      callApiLoadPosts().then(res => {
         const data = JSON.parse(res.express);
         setPosts(data);
       });
     }
   }, [selectedCourse]);
 
-  const callApiLoadCourseContent = async () => {
-    const url = '/api/fetchCourseContent';
+  const callApiLoadPosts = async () => {
+    const url = '/api/getPosts';
     const response = await fetch(url, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -53,11 +55,47 @@ const Home = () => {
   return (
     <>
       <Navigation />
-      <Box align="center" sx={{marginTop: '50px', marginBottom: '100px'}}>
-        <SearchBar courses={courses} label="Search Courses" selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse}/>
+      {/* Gradient Background */}
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#161d20'
+        }}
+      />
+      
+      {/* Centered Content */}
+      <Box
+        align="center"
+        sx={{
+          marginTop: '250px',
+          marginBottom: '100px',
+          position: 'relative',
+          zIndex: 1, // Ensure content is above the gradient background
+        }}
+      >
+        <Typography variant="h3" gutterBottom color="white">
+          Lets Learn, Together
+        </Typography>
+        <Typography variant="h5" gutterBottom color="white" sx={{ marginBottom: '20px' }}>
+          Find student-uploaded content on popular courses.
+        </Typography>
+        
+        {/* Search Bar */}
+        <Box align="center" marginY={'10px'}>
+          <SearchBar courses={courses} label="Search Courses" selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse}/>
+        </Box>
+        
       </Box>
-      <CourseContentGrid posts={posts}/>
-
+      
+      {/* Posts Grid */}
+      <Box align="center" marginX={2}>
+        <PostsGrid posts={posts}/>
+      </Box>
+      
+      {/* Upload Component */}
       <Upload courses={courses}/>
     </>
   );

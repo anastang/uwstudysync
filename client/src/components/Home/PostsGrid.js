@@ -3,10 +3,10 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
 import CardActionArea from '@mui/material/CardActionArea';
+import { format } from 'date-fns';
 
-function CourseContentGrid({ posts }) {
+function PostsGrid({ posts }) {
     return (
         <Grid container spacing={3}>
             {posts.map((post) => (
@@ -18,10 +18,7 @@ function CourseContentGrid({ posts }) {
                                     {post.title}
                                 </Typography>
                                 <Typography sx={{fontSize: '15px'}}>
-                                   {post.description}
-                                </Typography>
-                                <Typography sx={{fontSize: '15px'}}>
-                                   {post.date_posted}
+                                   Date Posted: {format(new Date(post.date_posted), 'MM-dd-yyyy')}
                                 </Typography>
                             </CardContent>
                         </CardActionArea>
@@ -32,4 +29,4 @@ function CourseContentGrid({ posts }) {
     );
 }
 
-export default CourseContentGrid;
+export default PostsGrid;
