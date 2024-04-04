@@ -144,23 +144,6 @@ app.post('/api/getPost/:post_id', (req, res) => {
     });
 });
 
-app.post('/api/posts/:post_id/comments', (req, res) => {
-    const { post_id } = req.params;
-    const { comment } = req.body;
-
-    const sql = 'INSERT INTO comments (post_id, comment) VALUES (?, ?)';
-    const data = [post_id, comment];
-
-    let connection = mysql.createConnection(config);
-    connection.query(sql, data, (error, results) => {
-        connection.end();
-        if (error) {
-            return res.status(500).json({ error: "Error posting comment" });
-        }
-        res.status(200).json({ success: true, message: 'Comment added successfully.' });
-    });
-});
-
 app.get('/api/posts/:post_id/comments', (req, res) => {
     const { post_id } = req.params;
     const sql = 'SELECT * FROM comments WHERE post_id = ? ORDER BY created_at DESC';
@@ -174,25 +157,37 @@ app.get('/api/posts/:post_id/comments', (req, res) => {
     });
 });
 
-app.post('/api/posts/:post_id/ratings', (req, res) => {
+app.post('/api/posts/:post_id/review', (req, res) => {
     const { post_id } = req.params;
-    const { rating } = req.body;
-
+    const { rating, comment } = req.body;
     if(rating < 1 || rating > 5) {
         return res.status(400).json({ error: "Rating must be between 1 and 5" });
     }
+    if (rating) { 
+        const sql = 'INSERT INTO ratings (post_id, rating) VALUES (?, ?)';
+        const data = [post_id, rating];
 
-    const sql = 'INSERT INTO ratings (post_id, rating) VALUES (?, ?)';
-    const data = [post_id, rating];
+        let connection = mysql.createConnection(config);
+        connection.query(sql, data, (error, results) => {
+            connection.end();
+            if (error) {
+                return res.status(500).json({ error: "Error posting rating" });
+            }
+        });
+    }
+    if (comment) { 
+        const sql = 'INSERT INTO comments (post_id, comment) VALUES (?, ?)';
+        const data = [post_id, comment];
 
-    let connection = mysql.createConnection(config);
-    connection.query(sql, data, (error, results) => {
-        connection.end();
-        if (error) {
-            return res.status(500).json({ error: "Error posting rating" });
-        }
-        res.status(200).json({ success: true, message: 'Rating added successfully.' });
-    });
+        let connection = mysql.createConnection(config);
+        connection.query(sql, data, (error, results) => {
+            connection.end();
+            if (error) {
+                return res.status(500).json({ error: "Error posting comment" });
+            }
+        });
+    }
+    res.status(200).json({ success: true, message: 'Review added successfully.' });
 });
 
 app.get('/api/posts/:post_id/averageRating', (req, res) => {
