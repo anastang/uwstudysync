@@ -1,126 +1,98 @@
-import React from 'react';
-import { Button, Link as MuiLink } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import Navigation from "../Navigation";
-import Avatar from '@mui/material/Avatar';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../Firebase/config';
-import firebase from 'firebase/compat/app'
+import React, {useState} from 'react';
+import {withFirebase} from '../Firebase';
+import {useNavigate} from 'react-router-dom';
+import {Grid, TextField, Typography, Button} from '@mui/material'
+import Navigation from '../Navigation/index'
+import { Link } from 'react-router-dom';
 
-const defaultTheme = createTheme();
+const SignIn = ({firebase, authenticated, authUser}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
-const SignIn = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (event) => {
+  const onSubmit = event => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
+    firebase
+    .doSignInWithEmailAndPassword(email, password)
+    .then(() => {
+      navigate('/');
+    })
+    .catch(error => {
+      setError(error);
     });
-    try {
-        const user = await signInWithEmailAndPassword(auth, data.get('email'), data.get('password'))
-        navigate('/'); // Redirect to home after sign-in
-    } catch (error) {
-        console.log(error.message)
-        alert(error.message);
-    }
   };
 
-  const handleSignUpClick = () => {
-    navigate('/signup'); // Redirect to sign-up page
+  const onEmailChange = (event) => {
+    setEmail(event.target.value);
+    setError(null);
   };
 
+  const onPasswordChange = (event) => {
+    setPassword(event.target.value);
+    setError(null);
+  };
+
+  if (authUser) { 
+    return (
+      <>
+        Already signed in
+      </>
+    )
+  }
   return (
     <>
       <Navigation />
-      <ThemeProvider theme={defaultTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign in
+      <Grid container align="center" paddingTop={10}>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <Typography variant="h5">
+              Sign In
             </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-
-                {/* // implement remember me? */}
-
-
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Sign In
-              </Button>
-              <Grid container>
-
-                {/* // implement forgot password? */}
-
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                    <MuiLink onClick={handleSignUpClick} variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </MuiLink>
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-        </Container>
-      </ThemeProvider>
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <TextField
+              variant="outlined"
+              required
+              label="Email Address"
+              onChange={(event) => (onEmailChange(event))}
+              sx={{width: "400px"}}
+            />
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <TextField
+              variant="outlined"
+              required
+              label="Password"
+              type="password"
+              onChange={(event) => (onPasswordChange(event))}
+              sx={{width: "400px"}}
+            />
+        </Grid>
+        {error && (
+          <Grid item xs={12} sx={{padding: 1}}>
+              <Typography color="error" style={{ textAlign: 'center' }}>
+                Invalid email or password
+              </Typography>
+          </Grid>
+        )}
+        <Grid item xs={12} sx={{padding: 1}}>
+          <Link to={"/signup"}>
+            Don't have an account? Click here to sign up
+          </Link>
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <Button
+              variant="contained"
+              sx={{ width: "400px" }}
+              onClick={(event) => (onSubmit(event))}
+            >
+              Sign In
+            </Button>
+        </Grid>
+      </Grid>
     </>
   );
-}
+};
 
-export default SignIn;
+export default withFirebase(SignIn);

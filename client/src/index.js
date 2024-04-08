@@ -5,11 +5,14 @@ import App from "./components/App";
 import * as serviceWorker from "./serviceWorker";
 import { ThemeProvider } from "@mui/material";
 import theme from './theme';
+import Firebase, {FirebaseContext} from './components/Firebase';
 
 ReactDOM.render(
-  <ThemeProvider theme={theme}>
-    <App />
-  </ThemeProvider>,
+  <FirebaseContext.Provider value={new Firebase()}>
+    <ThemeProvider theme={theme}>
+      <App />
+    </ThemeProvider>
+  </FirebaseContext.Provider>,
   document.getElementById("root")
 );
 

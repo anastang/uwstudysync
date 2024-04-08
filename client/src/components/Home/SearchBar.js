@@ -2,7 +2,7 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 
-function SearchBar({courses, label, selectedCourse, setSelectedCourse}) {
+function SearchBar({courses, label, setSelectedCourse}) {
   return (
     <Autocomplete
       options={courses}

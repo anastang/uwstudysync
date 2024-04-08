@@ -5,6 +5,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
 import { format } from 'date-fns';
+import Rating from '@mui/material/Rating';
 
 function PostsGrid({ posts }) {
     return (
@@ -16,6 +17,9 @@ function PostsGrid({ posts }) {
                             <CardContent align="left">
                                 <Typography gutterBottom sx={{fontWeight: 700, fontSize: '20px'}}>
                                     {post.title}
+                                </Typography>
+                                <Typography sx={{fontSize: '15px'}}>
+                                   Rating: {post.rating === null ? "Not available" : <Rating readOnly value={post.rating}/>}
                                 </Typography>
                                 <Typography sx={{fontSize: '15px'}}>
                                    Date Posted: {format(new Date(post.date_posted), 'MM-dd-yyyy')}

@@ -1,170 +1,142 @@
-import React from 'react';
-import { Button, Link as MuiLink } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import Navigation from "../Navigation";
-import Avatar from '@mui/material/Avatar';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../Firebase/config';
+import React, { useState } from 'react';
+import {withFirebase} from '../Firebase';
+import {Grid, TextField, Typography, Button} from '@mui/material'
+import Navigation from '../Navigation/index'
+import {Link, useNavigate} from 'react-router-dom';
 
-const defaultTheme = createTheme();
+const SignUp = ({ firebase, authenticated, authUser }) => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
-const SignUp = () => {
-  const navigate = useNavigate();
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const userData = {
-        email: data.get('email'),
-        password: data.get('password'),
-        firstName: data.get('firstName'),
-        lastName: data.get('lastName')
+  const callApiRegisterUser = async (id) => {
+    const url = `/api/registerUser`;
+    const user = {
+      id,
+      email,
+      password,
+      username
     };
-    
-    // Perform password length validation
-    if (userData.password.length < 6) {
-        console.error('Password must be at least 6 characters long');
-        alert('Password must be at least 6 characters long');
-        return; // Exit the function if password is invalid
-    }
-
     try {
-        // Create a fetch request to server's /api/register endpoint
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        });
-
-        // Check if the response is successful
-        if (response.ok) {
-            // If registration is successful, proceed with Firebase registration
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                data.get('email'),
-                data.get('password'),
-                data.get('firstName'),
-                data.get('lastName')
-            );
-            localStorage.setItem('firstName', data.get('firstName'));
-            const user = userCredential.user;
-            console.log('User registered successfully:', user);
-            navigate('/'); // Redirect to home after sign-up
-        } else {
-            // If registration fails, display an error message
-            const errorData = await response.json();
-            console.error('Failed to register user:', errorData.message);
-            alert('Failed to register user: ' + errorData.message);
-        }
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+      });
+      const body = await response.json();
+      if (response.status !== 200) {
+        throw Error(body.message || 'Error registering user');
+      }
+      return body;
     } catch (error) {
-        console.error('Error during registration:', error.message);
-        alert('Error during registration: ' + error.message);
+      console.error('Error during user registration:', error);
     }
-};
-
-  const handleSignInClick = () => {
-    navigate('/signin'); // Redirect to sign-in page
   };
 
+  const navigate = useNavigate();
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    firebase
+    .doCreateUserWithEmailAndPassword(email, password)
+    .then(async authUser => {
+      const id = authUser.user.uid;        
+      await callApiRegisterUser(id);
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setError(null);
+      navigate("/");
+    }).catch(error => {
+      console.log(error);
+      setError("Error");
+    });
+  };
+
+  const onNameChange = (event) => {
+    setUsername(event.target.value);
+    setError(null);
+  };
+
+  const onEmailChange = (event) => {
+    setEmail(event.target.value);
+    setError(null);
+  };
+
+  const onPasswordChange = (event) => {
+    setPassword(event.target.value);
+    setError(null);
+  };
+
+  if (authUser) { 
+    return (
+      <>
+        Already signed in
+      </>
+    )
+  }
   return (
     <>
-      <Navigation />
-      <ThemeProvider theme={defaultTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign up
+      <Navigation/>
+      <Grid container align="center" paddingTop={10}>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <Typography variant="h5">
+              Sign Up
             </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    autoComplete="given-name"
-                    name="firstName"
-                    required
-                    fullWidth
-                    id="firstName"
-                    label="First Name"
-                    autoFocus
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="lastName"
-                    label="Last Name"
-                    name="lastName"
-                    autoComplete="family-name"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                  />
-                </Grid>
-              </Grid>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Sign Up
-              </Button>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <MuiLink onClick={handleSignInClick} variant="body2">
-                    Already have an account? Sign in
-                  </MuiLink>
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-        </Container>
-      </ThemeProvider>
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <TextField
+              variant="outlined"
+              required
+              label="Username"
+              onChange={(event) => onNameChange(event)}
+              sx={{width: "400px"}}
+            />
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <TextField
+              variant="outlined"
+              required
+              label="Email Address"
+              onChange={(event) => onEmailChange(event)}
+              sx={{width: "400px"}}
+            />
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <TextField
+              variant="outlined"
+              required
+              label="Password"
+              type="password"
+              onChange={(event) => onPasswordChange(event)}
+              sx={{width: "400px"}}
+            />
+        </Grid>
+        {error && (
+          <Grid item xs={12} sx={{padding: 1}}>
+              <Typography color="error" style={{ textAlign: 'center' }}>
+                Please fill in all fields
+              </Typography>
+          </Grid>
+        )}
+        <Grid item xs={12} sx={{padding: 1}}>
+          <Link to={"/signin"}>
+            Already have an account? Click here to sign in
+          </Link>
+        </Grid>
+        <Grid item xs={12} sx={{padding: 1}}>
+            <Button
+              variant="contained"
+              sx={{ width: "400px" }}
+              onClick={(event) => (onSubmit(event))}
+            >
+              Sign Up
+            </Button>
+        </Grid>
+      </Grid>
     </>
   );
 }
 
-export default SignUp;
+export default withFirebase(SignUp);

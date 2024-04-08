@@ -15,7 +15,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 
-const Upload = ({courses}) => {
+const Upload = ({courses, authUser}) => {
 
     const [selectedCourse, setSelectedCourse] = React.useState();
     const [file, setFile] = React.useState();
@@ -35,10 +35,35 @@ const Upload = ({courses}) => {
         post.append('fileType', fileType);
         post.append('title', title);
         post.append('description', description);
+        post.append('user_id', authUser.uid);
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 body: post,
+            });
+            const body = await response.json();
+            if (response.status !== 200) {
+                throw Error(body.message || 'Error uploading files.');
+            }
+            return body;
+        } catch (error) {
+            console.error('Error during the upload:', error);
+        }
+    };
+
+    const callApiUploadLink = async () => {
+        const url = '/api/uploadLink';
+        const payload = {
+            course: selectedCourse,
+            title,
+            description,
+            user_id: authUser.uid,
+        };
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
             const body = await response.json();
             if (response.status !== 200) {
@@ -67,11 +92,12 @@ const Upload = ({courses}) => {
                     <input type="file" onChange={(event) => setFile(event.target.files[0])}/>
                 </Box>
                 <Box sx={{marginTop: "10px"}}>
-                    <Typography>Select file type:</Typography>
+                    <Typography>Select type:</Typography>
                     <FormControl>
-                        <RadioGroup row value={fileType} onChange={(event) => {setFileType(event.target.value)}}>
+                        <RadioGroup value={fileType} onChange={(event) => {setFileType(event.target.value)}}>
                             <FormControlLabel value="IMG" control={<Radio />} label="IMG (JPG, PNG, etc)" />
                             <FormControlLabel value="PDF" control={<Radio />} label="PDF" />
+                            <FormControlLabel value="Link" control={<Radio />} label="Link (please provide the link in the description)" />
                         </RadioGroup>
                     </FormControl>
                 </Box>
@@ -86,7 +112,7 @@ const Upload = ({courses}) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>
-                <Button disabled={!selectedCourse || !file || !title} onClick={callApiUploadPost}>Upload</Button>
+                <Button disabled={fileType === "Link" ? (!selectedCourse || !title || !description) : (!selectedCourse || !file || !title)} onClick={fileType === "Link" ? callApiUploadLink : callApiUploadPost}>Upload</Button>
             </DialogActions>
         </Dialog>
         </>
